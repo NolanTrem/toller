@@ -1,0 +1,83 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "toller"
+version = "0.0.1"
+description = "Intelligent async flow controller for Python - making complex asyncio workflows manageable"
+readme = "README.md"
+requires-python = ">=3.9"
+license = {file = "LICENSE"}
+authors = [
+    {name = "Nolan Tremelling", email = "nolantremelling@gmail.com"}
+]
+keywords = [
+    "async",
+    "asyncio",
+    "flow-control", 
+    "concurrency",
+    "rate-limiting",
+    "async-workflows",
+    "ai-workflows"
+]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+]
+dependencies = [
+    "asyncio",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0.0",
+    "pytest-asyncio>=0.20.0",
+    "black>=23.0.0",
+    "isort>=5.12.0",
+    "mypy>=1.0.0",
+    "ruff>=0.0.200",
+]
+docs = [
+    "sphinx>=6.0.0",
+    "sphinx-rtd-theme>=1.2.0",
+    "myst-parser>=1.0.0",
+]
+
+[project.urls]
+Homepage = "https://github.com/yourusername/toller"
+Issues = "https://github.com/yourusername/toller/issues"
+Documentation = "https://toller.readthedocs.io"
+
+[tool.hatch.build.targets.wheel]
+packages = ["toller"]
+
+[tool.black]
+line-length = 88
+
+[tool.isort]
+profile = "black"
+
+[tool.mypy]
+python_version = "3.9"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = true
+disallow_incomplete_defs = true
+
+[tool.ruff]
+target-version = "py39"
+line-length = 88
+select = ["E", "F", "B"]
+ignore = []
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
