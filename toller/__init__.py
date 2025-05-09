@@ -8,6 +8,7 @@ from .exceptions import (
     MaxRetriesExceeded,
 )
 from .breakers import CircuitBreaker, CircuitState
+from .limiters import CallRateLimiter
 
 __all__ = [
     "__version__",
@@ -20,4 +21,6 @@ __all__ = [
     # Breakers
     "CircuitBreaker",
     "CircuitState",
+    # Limiters
+    "CallRateLimiter",
 ]
