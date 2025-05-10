@@ -1,7 +1,11 @@
+"""
+Circuit breaker patterns for the Toller library.
+"""
+
 import asyncio
 import time
 from enum import Enum, auto
-from typing import Type, Optional, Tuple
+from typing import Type, Tuple
 
 from .exceptions import OpenCircuitError
 
@@ -29,7 +33,7 @@ class CircuitBreaker:
         failure_threshold: int = 5,
         recovery_timeout: float = 30.0,
         expected_exception: Type[Exception] | Tuple[Type[Exception], ...] = Exception,
-        name: Optional[str] = None,
+        name: str | None = None,
     ):
         """
         Initializes the CircuitBreaker.
@@ -55,7 +59,7 @@ class CircuitBreaker:
 
         self._state = CircuitState.CLOSED
         self._failure_count = 0
-        self._last_failure_time: Optional[float] = None
+        self._last_failure_time: float | None = None
         self._lock = asyncio.Lock()  # Protects state transitions
 
         # TODO: Add logger injection
@@ -70,7 +74,7 @@ class CircuitBreaker:
         """Get the current consecutive failure count."""
         return self._failure_count
 
-    async def __aenter__(self):
+    async def __aenter__(self) -> "CircuitBreaker":
         """Checks the breaker state before allowing the call."""
         async with self._lock:
             now = time.monotonic()
@@ -93,7 +97,7 @@ class CircuitBreaker:
             # If CLOSED or HALF_OPEN, allow the call attempt
             return self
 
-    async def __aexit__(self, exc_type, exc_val, traceback):
+    async def __aexit__(self, exc_type, exc_val, traceback) -> None:
         """Updates the breaker state based on the call outcome."""
         async with self._lock:
             is_failure = exc_type is not None and issubclass(
