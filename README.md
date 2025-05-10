@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="logo.png" alt="Toller Logo" width="200"/>
+  <img src="logo.png" alt="Toller Logo" width="800"/>
 </p>
 
 ## What is Toller?
