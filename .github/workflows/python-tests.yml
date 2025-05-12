@@ -2,9 +2,9 @@ name: Python Tests
 
 on:
   push:
-    branches: [ main, master ]
+    branches: main
   pull_request:
-    branches: [ main, master ]
+    branches: main
   workflow_dispatch:
 
 jobs:
@@ -30,14 +30,25 @@ jobs:
         
     - name: Run tests
       run: |
-        pytest
+        pytest --junitxml=pytest-report-${{ matrix.python-version }}.xml
         
     - name: Upload test results
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       if: always()  # Upload even if tests fail
       with:
         name: pytest-results-${{ matrix.python-version }}
         path: |
           .pytest_cache
-          pytest-report.xml
+          pytest-report-${{ matrix.python-version }}.xml
         retention-days: 5
+
+  merge-results:
+    needs: test
+    runs-on: ubuntu-latest
+    if: always()
+    steps:
+      - name: Merge test results
+        uses: actions/upload-artifact/merge@v4
+        with:
+          name: all-pytest-results
+          pattern: pytest-results-*
