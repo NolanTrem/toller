@@ -7,7 +7,7 @@ name = "toller"
 version = "0.0.1"
 description = "Intelligent async flow controller for Python - making complex asyncio workflows manageable"
 readme = "README.md"
-requires-python = ">=3.9"
+requires-python = ">=3.10"
 license = {file = "LICENSE"}
 authors = [
     {name = "Nolan Tremelling", email = "nolantremelling@gmail.com"}
@@ -74,7 +74,7 @@ disallow_untyped_defs = true
 disallow_incomplete_defs = true
 
 [tool.ruff]
-target-version = "py39"
+target-version = "py310"
 line-length = 88
 select = ["E", "F", "B"]
 ignore = []
