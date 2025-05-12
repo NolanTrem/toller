@@ -53,9 +53,9 @@ docs = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/yourusername/toller"
-Issues = "https://github.com/yourusername/toller/issues"
-Documentation = "https://toller.readthedocs.io"
+Homepage = "https://github.com/NolanTrem/toller"
+Issues = "https://github.com/NolanTrem/toller/issues"
+Documentation = "https://tollerlib.dev"
 
 [tool.hatch.build.targets.wheel]
 packages = ["toller"]
