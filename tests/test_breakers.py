@@ -1,9 +1,9 @@
 import asyncio
 import pytest
+from typing import Any
+import contextlib
 
 from toller import CircuitBreaker, CircuitState, OpenCircuitError
-
-pytestmark = pytest.mark.asyncio
 
 
 class MockException(Exception):
@@ -18,26 +18,26 @@ class AnotherMockException(Exception):
     pass
 
 
-async def mock_successful_call():
+async def mock_successful_call() -> str:
     """Simulates a call that succeeds."""
     await asyncio.sleep(0.01)
     return "Success"
 
 
-async def mock_failing_call(exception_type=MockException):
+async def mock_failing_call(exception_type: Any = MockException) -> None:
     """Simulates a call that fails."""
     await asyncio.sleep(0.01)
     raise exception_type("Operation failed")
 
 
-async def test_initial_state_is_closed():
+async def test_initial_state_is_closed() -> None:
     """Test that the initial state of the circuit breaker is CLOSED."""
     breaker = CircuitBreaker()
     assert breaker.state == CircuitState.CLOSED
     assert breaker.current_failures == 0
 
 
-async def test_successful_calls_keep_closed():
+async def test_successful_calls_keep_closed() -> None:
     """Test that successful calls keep the circuit breaker in CLOSED state."""
     breaker = CircuitBreaker()
     for _ in range(5):
@@ -47,8 +47,8 @@ async def test_successful_calls_keep_closed():
     assert breaker.current_failures == 0
 
 
-async def test_failures_increment_count():
-    """Failures should increment the failure count but not open the circuit if below threshold."""
+async def test_failures_increment_count() -> None:
+    """Increment failure count but don't open the circuit if below threshold."""
     breaker = CircuitBreaker(failure_threshold=5)
     for i in range(3):
         with pytest.raises(MockException):
@@ -58,7 +58,7 @@ async def test_failures_increment_count():
     assert breaker.state == CircuitState.CLOSED
 
 
-async def test_failure_threshold_opens_circuit():
+async def test_failure_threshold_opens_circuit() -> None:
     """Test that reaching the failure threshold opens the circuit."""
     threshold = 3
     breaker = CircuitBreaker(failure_threshold=threshold)
@@ -70,7 +70,7 @@ async def test_failure_threshold_opens_circuit():
     assert breaker.current_failures == threshold
 
 
-async def test_open_circuit_blocks_calls():
+async def test_open_circuit_blocks_calls() -> None:
     """Test that an open circuit blocks calls immediately."""
     breaker = CircuitBreaker(failure_threshold=1)
     with pytest.raises(MockException):
@@ -83,7 +83,7 @@ async def test_open_circuit_blocks_calls():
             await mock_failing_call()
 
 
-async def test_recovery_timeout_moves_to_half_open():
+async def test_recovery_timeout_moves_to_half_open() -> None:
     """Test that after the recovery timeout, the circuit moves to HALF_OPEN state."""
     recovery_time = 0.1
     breaker = CircuitBreaker(failure_threshold=1, recovery_timeout=recovery_time)
@@ -106,7 +106,7 @@ async def test_recovery_timeout_moves_to_half_open():
     assert breaker.state == CircuitState.OPEN
 
 
-async def test_success_in_half_open_closes_circuit():
+async def test_success_in_half_open_closes_circuit() -> None:
     """Test that a successful call in HALF_OPEN state closes the circuit."""
     recovery_time = 0.1
     breaker = CircuitBreaker(failure_threshold=1, recovery_timeout=recovery_time)
@@ -125,7 +125,7 @@ async def test_success_in_half_open_closes_circuit():
     assert breaker.current_failures == 0
 
 
-async def test_failure_in_half_open_reopens_circuit():
+async def test_failure_in_half_open_reopens_circuit() -> None:
     """Test that a failure in HALF_OPEN state reopens the circuit."""
     recovery_time = 0.1
     breaker = CircuitBreaker(failure_threshold=1, recovery_timeout=recovery_time)
@@ -148,7 +148,7 @@ async def test_failure_in_half_open_reopens_circuit():
             await mock_failing_call()
 
 
-async def test_success_resets_failure_count_when_closed():
+async def test_success_resets_failure_count_when_closed() -> None:
     """Test that a successful call resets the failure count when in CLOSED state."""
     breaker = CircuitBreaker(failure_threshold=3)
 
@@ -172,7 +172,7 @@ async def test_success_resets_failure_count_when_closed():
     assert breaker.current_failures == 1
 
 
-async def test_expected_exception_filtering():
+async def test_expected_exception_filtering() -> None:
     """Test that only expected exceptions trip the circuit breaker."""
     breaker = CircuitBreaker(failure_threshold=2, expected_exception=MockException)
 
@@ -194,7 +194,7 @@ async def test_expected_exception_filtering():
     assert breaker.state == CircuitState.OPEN
 
 
-async def test_expected_exception_tuple():
+async def test_expected_exception_tuple() -> None:
     """Test that a tuple of exceptions can be used to trip the circuit breaker."""
     breaker = CircuitBreaker(
         failure_threshold=2, expected_exception=(MockException, AnotherMockException)
@@ -212,18 +212,16 @@ async def test_expected_exception_tuple():
     assert breaker.state == CircuitState.OPEN
 
 
-async def test_concurrent_failures_open_circuit():
+async def test_concurrent_failures_open_circuit() -> None:
     """Test that concurrent failures can open the circuit."""
     threshold = 5
     breaker = CircuitBreaker(failure_threshold=threshold)
     num_concurrent = 10
 
-    async def concurrent_task():
-        try:
+    async def concurrent_task() -> None:
+        with contextlib.suppress(MockException, OpenCircuitError):
             async with breaker:
                 await mock_failing_call()
-        except (MockException, OpenCircuitError):
-            pass
 
     tasks = [asyncio.create_task(concurrent_task()) for _ in range(num_concurrent)]
     await asyncio.gather(*tasks)
@@ -232,7 +230,7 @@ async def test_concurrent_failures_open_circuit():
     assert breaker.current_failures >= threshold
 
 
-async def test_invalid_init_args():
+async def test_invalid_init_args() -> None:
     with pytest.raises(ValueError):
         CircuitBreaker(failure_threshold=0)
     with pytest.raises(ValueError):

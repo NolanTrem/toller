@@ -1,0 +1,54 @@
+name: Python Tests
+
+on:
+  push:
+    branches: main
+  pull_request:
+    branches: main
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.10", "3.11", "3.12", "3.13"]
+
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ matrix.python-version }}
+        
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        python -m pip install -e ".[dev]"
+        
+    - name: Run tests
+      run: |
+        pytest --junitxml=pytest-report-${{ matrix.python-version }}.xml
+        
+    - name: Upload test results
+      uses: actions/upload-artifact@v4
+      if: always()  # Upload even if tests fail
+      with:
+        name: pytest-results-${{ matrix.python-version }}
+        path: |
+          .pytest_cache
+          pytest-report-${{ matrix.python-version }}.xml
+        retention-days: 5
+
+  merge-results:
+    needs: test
+    runs-on: ubuntu-latest
+    if: always()
+    steps:
+      - name: Merge test results
+        uses: actions/upload-artifact/merge@v4
+        with:
+          name: all-pytest-results
+          pattern: pytest-results-*
