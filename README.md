@@ -45,8 +45,8 @@ pip install toller
 
 ## Usage and Examples
 
+### Example 1: Basic Resilience for Generative AI Calls
 <details open>
-    <summary>Basic Resilience for Generative AI Calls</summary>
     For a function that calls out to an LLM, we want to handle rate limits, retry on temporary server issues, and stop if the service is truly down.
 
 ```python
@@ -141,8 +141,8 @@ if __name__ == "__main__":
 </details>
 
 
-<details open>
-    <summary>Shared Rate Limiter for Multiple Related API Calls</summary>
+### Example 2: Shared Rate Limiter for Multiple Related API Calls
+<details>
     Often, different API endpoints for the same service share an overall rate limit.
 
 ```python
