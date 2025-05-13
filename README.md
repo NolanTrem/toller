@@ -52,6 +52,7 @@ pip install toller
 ```python
 import asyncio
 import random
+import toller
 from toller import TransientError, FatalError, MaxRetriesExceeded, OpenCircuitError
 
 # Define potential API errors
@@ -146,7 +147,9 @@ if __name__ == "__main__":
     Often, different API endpoints for the same service share an overall rate limit.
 
 ```python
+import asyncio
 import time
+import toller
 from toller import CallRateLimiter # For creating a shared instance
 
 # Assume these two functions call endpoints that share a single rate limit pool
