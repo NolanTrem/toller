@@ -1,4 +1,4 @@
-__version__ = "0.0.1"
+__version__ = "0.0.3"
 
 from .exceptions import (
     TollerError,
@@ -9,9 +9,12 @@ from .exceptions import (
 )
 from .breakers import CircuitBreaker, CircuitState
 from .limiters import CallRateLimiter
+from .decorators import task
 
 __all__ = [
     "__version__",
+    # Decorators
+    "task",
     # Exceptions
     "TollerError",
     "OpenCircuitError",
