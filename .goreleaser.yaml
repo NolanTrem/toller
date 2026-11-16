@@ -1,0 +1,52 @@
+# Release builds: one static binary per platform, a GitHub release, and a Homebrew cask in
+# NolanTrem/homebrew-tap. Runs from .github/workflows/release.yml when a v* tag is pushed.
+version: 2
+project_name: toller
+
+builds:
+  - id: toller
+    main: .
+    binary: toller
+    env:
+      - CGO_ENABLED=0
+    goos: [linux, darwin, windows]
+    goarch: [amd64, arm64]
+    flags:
+      - -trimpath
+    ldflags:
+      - -s -w -X main.version={{ .Version }}
+
+archives:
+  - id: toller
+    formats: [tar.gz]
+    format_overrides:
+      - goos: windows
+        formats: [zip]
+    name_template: "{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
+    files:
+      - README.md
+      - LICENSE
+
+checksum:
+  name_template: checksums.txt
+
+changelog:
+  use: github
+  sort: asc
+
+homebrew_casks:
+  - name: toller
+    repository:
+      owner: NolanTrem
+      name: homebrew-tap
+      token: "{{ .Env.HOMEBREW_TAP_GITHUB_TOKEN }}"
+    homepage: https://github.com/NolanTrem/toller
+    description: Finds and fixes the ticket keys and stale notes AI coding agents leave in comments.
+    license: MIT
+    hooks:
+      post:
+        # The binaries are not notarized, so remove the quarantine flag that blocks them on first run.
+        install_steps: |
+          on_macos do
+            run "/usr/bin/xattr", args: ["-dr", "com.apple.quarantine", "{{ .StagedPath }}/toller"]
+          end

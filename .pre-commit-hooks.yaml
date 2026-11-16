@@ -1,0 +1,6 @@
+- id: toller
+  name: toller
+  description: Find ticket keys, tracker links, and stale notes in the comment lines you are about to commit.
+  entry: toller --staged
+  language: golang
+  pass_filenames: false
