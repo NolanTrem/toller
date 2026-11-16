@@ -41,7 +41,7 @@ func applyFixes(results []fileComments, f *fixer, dryRun bool) (int, error) {
 			continue
 		}
 		sx := syntaxFor(fc.path)
-		out, recs := f.planFixes(fc.path, src, sx, fc.comments)
+		out, recs := f.fixAll(fc.path, src, sx, fc.comments)
 		if len(recs) == 0 {
 			continue
 		}

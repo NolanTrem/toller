@@ -125,8 +125,10 @@ func (f *fixer) fixText(text, above string, hasAbove bool) (out string, shapes [
 		return "", append(shapes, "whole"), carry
 	}
 	// A parenthetical removed from the line start can leave the punctuation that followed it, as in
-	// "(PROJ-1). Next sentence": that punctuation belongs to the sentence on the line above.
-	if p := strings.IndexFunc(text, func(r rune) bool { return !strings.ContainsRune(".,;", r) }); p > 0 && len(shapes) > 0 {
+	// "(PROJ-1). Next sentence": that punctuation belongs to the sentence on the line above. Punctuation
+	// that a space does not follow is part of a word, as in ".../path" or "./script.sh".
+	if p := strings.IndexFunc(text, func(r rune) bool { return !strings.ContainsRune(".,;", r) }); p > 0 && len(shapes) > 0 &&
+		(text[p] == ' ' || text[p] == '\t') {
 		punct := text[:1]
 		if cont {
 			carry = punct
@@ -224,6 +226,21 @@ var (
 	trailingMarker = regexp.MustCompile(`^(.*\S)\s*(?://+|#)\s*$`)
 	directiveRe    = regexp.MustCompile(`eslint-|@ts-|prettier-ignore|biome-ignore|#__PURE__|@vite-ignore|istanbul ignore|c8 ignore|webpackChunkName|toller:ignore`)
 )
+
+// fixAll runs planFixes until a pass changes nothing, because removing one key can make another
+// removable: "(PROJ-2)" goes first in "PROJ-1 (PROJ-2): text", and then the "PROJ-1: " label can go.
+func (f *fixer) fixAll(path string, src []byte, sx *syntax, comments []Comment) ([]byte, []fixRecord) {
+	var all []fixRecord
+	for pass := 0; pass < 5; pass++ {
+		out, recs := f.planFixes(path, src, sx, comments)
+		if len(recs) == 0 {
+			break
+		}
+		src, all = out, append(all, recs...)
+		comments, _ = lex(src, sx)
+	}
+	return src, all
+}
 
 // planFixes rewrites the comments in src that hold removable keys. It returns the new source and one
 // record per changed line. If the edit touched anything outside comments, it returns src unchanged.
